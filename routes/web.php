@@ -18,3 +18,8 @@ Route::get('/', function () {
 Auth::routes();
 
 Route::get('/home', 'HomeController@index')->name('home');
+
+/**
+ * OAuth routes
+ */
+Route::get('/authorize', 'OAuthController@authorizeIndex')->name('authorize');
