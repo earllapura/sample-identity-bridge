@@ -23,6 +23,8 @@ class OAuthController extends Controller
      */
     public function authorizeIndex(Request $request)
     {
-        //
+        if (!$request->filled('client_id')) {
+            abort(400);
+        }
     }
 }
