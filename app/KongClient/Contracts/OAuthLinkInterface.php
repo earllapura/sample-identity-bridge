@@ -2,14 +2,14 @@
 
 namespace App\KongClient\Contracts;
 
-use GuzzleHttp\Psr7\Response;
-
 interface OAuthLinkInterface
 {
     /**
      * Sends a request for application info
-     * @param  String $clientId                    The ID of the client as registered in Kong
-     * @return \GuzzleHttp\Psr7\Response           [description]
+     * @param  string $clientId  The ID of the client as registered in Kong
+     * @return object            A standard object with top level attribute
+     *                           <code>statusCode</code> for HTTP status code and
+     *                           <code>client</code> with oject containing client info
      */
-    public function getClientInfo(Response $clientId);
+    public function getClientInfo(string $clientId);
 }

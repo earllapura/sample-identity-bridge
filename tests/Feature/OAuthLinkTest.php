@@ -18,13 +18,25 @@ class OAuthLinkTest extends TestCase
      */
     public function testGetsClientInfo()
     {
-        $unsuccessfulResponse = new Response(200, ['Content-Type' => 'application/json'], '{"total":1,"data":[{"created_at":1534239617000,"client_id":"test_app","id":"a20b986a-c220-409a-b78a-d7ee4942e80c","redirect_uri":["http:\/\/mockbin.org\/"],"name":"Test Application","client_secret":"testapp123","consumer_id":"9dd18971-d706-4f78-bb92-62be43a61c86"}]}');
+        $unsuccessfulResponse = new Response(200, ['Content-Type' => 'application/json'], '{"total":1,"data":[{"created_at":1534239617000,"client_id":"test_app","id":"12121212121","redirect_uri":["http:\/\/mockbin.org\/"],"name":"Test Application","client_secret":"testapp123","consumer_id":"212121"}]}');
         $mock = new MockHandler([$unsuccessfulResponse]);
         $handler = HandlerStack::create($mock);
         $client = new Client(['handler'=>$handler]);
         $apiLink = new OAuthLink($client);
-        $expectedId = "a20b986a-c220-409a-b78a-d7ee4942e80c";
+        $expectedId = "12121212121";
         $clientInfo = $apiLink->getClientInfo("test_app");
-        $this->assertEquals($expectedId, $clientInfo->id);
+        $this->assertEquals($expectedId, $clientInfo->client->id);
+    }
+
+    public function testGetsHttpStatusOnClientInfo()
+    {
+        $unsuccessfulResponse = new Response(403, ['Content-Type' => 'application/json']);
+        $mock = new MockHandler([$unsuccessfulResponse]);
+        $handler = HandlerStack::create($mock);
+        $client = new Client(['handler'=>$handler, 'http_errors'=>false]);
+        $apiLink = new OAuthLink($client);
+        $expectedStatus = 403;
+        $clientInfo = $apiLink->getClientInfo("test_app");
+        $this->assertEquals($expectedStatus, $clientInfo->statusCode);
     }
 }

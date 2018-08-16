@@ -19,7 +19,7 @@ class OAuthLink implements OAuthLinkInterface
     /**
      * @inheritDoc
      */
-    public function getClientInfo($clientId)
+    public function getClientInfo(string $clientId)
     {
         $response = $this->client->request('GET', config('api.gateway') . '/oauth2',
             [
@@ -27,6 +27,7 @@ class OAuthLink implements OAuthLinkInterface
             ]
         );
         $parsed = json_decode($response->getBody());
-        return $parsed->data[0];
+        $clientInfo = (!empty($parsed) && property_exists($parsed, 'data')) ? $parsed->data[0] : null;
+        return (object)['client'=>$clientInfo, 'statusCode'=>$response->getStatusCode()];
     }
 }
