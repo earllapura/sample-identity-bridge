@@ -29,4 +29,27 @@ class OAuthLinkTest extends TestCase
         $this->assertEquals($expectedId, $clientInfo->client->id);
         $this->assertEquals(206, $clientInfo->statusCode);
     }
+
+    /**
+     * Tests if class gets scope information from the Kong API
+     */
+    public function testGetsScopeInfo()
+    {
+        $scopeName = "testscope";
+        $response = new Response(200, ['Content-Type' => 'application/json'], 
+            '{
+                "data": [{
+                    "name": "'.$scopeName.'",
+                    "description": "Lorem ipsum desu ka"
+                }]
+            }'
+        );
+        $mock = new MockHandler([$response]);
+        $handler = HandlerStack::create($mock);
+        $client = new Client(['handler'=>$handler, 'http_errors'=>false]);
+        $apiLink = new OAuthLink($client);
+        $scopeInfo = $apiLink->getScopeInfo("test_app");
+        $this->assertEquals($scopeName, $scopeInfo->scope->name);
+        $this->assertEquals(200, $scopeInfo->statusCode);
+    }
 }
