@@ -21,14 +21,13 @@ class OAuthLink implements OAuthLinkInterface
      */
     public function getClientInfo(string $clientId)
     {
-        $response = $this->client->request('GET', config('api.gateway') . '/oauth2',
+        return $this->queryGatewayFirst(
+            '/oauth2',
             [
                 'client_id' => $clientId,
-            ]
+            ],
+            'client'
         );
-        $parsed     = json_decode($response->getBody());
-        $clientInfo = (!empty($parsed) && property_exists($parsed, 'data')) ? $parsed->data[0] : null;
-        return (object) ['client' => $clientInfo, 'statusCode' => $response->getStatusCode()];
     }
 
     /**
@@ -36,13 +35,33 @@ class OAuthLink implements OAuthLinkInterface
      */
     public function getScopeInfo(string $scopeName)
     {
-        $response = $this->client->request('GET', config('api.gateway') . '/auth/scopes',
+        return $this->queryGatewayFirst(
+            '/auth/scopes',
             [
                 'scope_name' => $scopeName,
-            ]
+            ],
+            'scope'
         );
-        $parsed    = json_decode($response->getBody());
-        $scopeInfo = (!empty($parsed) && property_exists($parsed, 'data')) ? $parsed->data[0] : null;
-        return (object) ['scope' => $scopeInfo, 'statusCode' => $response->getStatusCode()];
+    }
+
+    /**
+     * Helper function to get first result of a gateway query
+     * @param  string $path            The relative path on the gateway
+     * @param  array  $queryParameters The query parameters
+     * @param  string $dataKey         The key for the data object
+     * @return object                  A standard object with top level attribute
+     *                                 <code>statusCode</code> for HTTP status code and
+     *                                 <code>dataKey</code> with object containing the data
+     */
+    private function queryGatewayFirst(string $path, array $queryParameters, string $dataKey)
+    {
+        $response = $this->client->request(
+            'GET',
+            config('api.gateway') . $path,
+            $queryParameters
+        );
+        $parsed = json_decode($response->getBody());
+        $data = (!empty($parsed) && property_exists($parsed, 'data')) ? $parsed->data[0] : null;
+        return (object)[$dataKey=>$data, 'statusCode'=>$response->getStatusCode()];
     }
 }
