@@ -14,11 +14,12 @@ use Tests\TestCase;
 class OAuthLinkTest extends TestCase
 {
     /**
-     * Test if class gets application info
+     * Test if class gets application info. The HTTP status code is just to test
+     * if status code is reflected.
      */
     public function testGetsClientInfo()
     {
-        $unsuccessfulResponse = new Response(200, ['Content-Type' => 'application/json'], '{"total":1,"data":[{"created_at":1534239617000,"client_id":"test_app","id":"12121212121","redirect_uri":["http:\/\/mockbin.org\/"],"name":"Test Application","client_secret":"testapp123","consumer_id":"212121"}]}');
+        $unsuccessfulResponse = new Response(206, ['Content-Type' => 'application/json'], '{"total":1,"data":[{"created_at":1534239617000,"client_id":"test_app","id":"12121212121","redirect_uri":["http:\/\/mockbin.org\/"],"name":"Test Application","client_secret":"testapp123","consumer_id":"212121"}]}');
         $mock = new MockHandler([$unsuccessfulResponse]);
         $handler = HandlerStack::create($mock);
         $client = new Client(['handler'=>$handler]);
@@ -26,17 +27,6 @@ class OAuthLinkTest extends TestCase
         $expectedId = "12121212121";
         $clientInfo = $apiLink->getClientInfo("test_app");
         $this->assertEquals($expectedId, $clientInfo->client->id);
-    }
-
-    public function testGetsHttpStatusOnClientInfo()
-    {
-        $unsuccessfulResponse = new Response(403, ['Content-Type' => 'application/json']);
-        $mock = new MockHandler([$unsuccessfulResponse]);
-        $handler = HandlerStack::create($mock);
-        $client = new Client(['handler'=>$handler, 'http_errors'=>false]);
-        $apiLink = new OAuthLink($client);
-        $expectedStatus = 403;
-        $clientInfo = $apiLink->getClientInfo("test_app");
-        $this->assertEquals($expectedStatus, $clientInfo->statusCode);
+        $this->assertEquals(206, $clientInfo->statusCode);
     }
 }
