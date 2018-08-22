@@ -34,10 +34,27 @@ class OAuthController extends Controller
         if (!$request->filled('client_id')) {
             abort(400);
         }
-        $response       = $this->link->getClientInfo($request->client_id);
-        $responseStatus = $response->statusCode;
-        if (!($responseStatus >= 200 && $responseStatus < 300)) {
-            abort($responseStatus);
+        $clientQueryResponse       = $this->link->getClientInfo($request->client_id);
+        $scopeQueryResponse        = $this->link->getScopeInfo($request->scopes);
+        $clientQueryResponseStatus = $clientQueryResponse->statusCode;
+        $scopeQueryResponseStatus  = $clientQueryResponse->statusCode;
+        if (!($clientQueryResponseStatus >= 200 && $clientQueryResponseStatus < 300)) {
+            abort($clientQueryResponseStatus);
         }
+        if (!($scopeQueryResponseStatus >= 200 && $scopeQueryResponseStatus < 300)) {
+            abort($scopeQueryResponseStatus);
+        }
+
+        $scopeArray = array();
+        foreach ($scopeQueryResponse->scopes as $rawScope) {
+            $scopeArray[$rawScope->name] = $rawScope->description;
+        }
+
+        return view('oauth.authorize',
+            [
+                'application_name' => $clientQueryResponse->client->name,
+                'scopes'           => $scopeArray,
+            ]
+        );
     }
 }
