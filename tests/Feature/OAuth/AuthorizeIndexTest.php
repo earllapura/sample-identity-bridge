@@ -9,7 +9,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Mockery;
 use Tests\TestCase;
 
-class AuthorizeTest extends TestCase
+class AuthorizeIndexTest extends TestCase
 {
     use RefreshDatabase;
 
