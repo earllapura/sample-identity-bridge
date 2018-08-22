@@ -22,4 +22,5 @@ Route::get('/home', 'HomeController@index')->name('home');
 /**
  * OAuth routes
  */
-Route::get('/authorize', 'OAuthController@authorizeIndex')->name('authorize');
+Route::get('/authorize', 'OAuthController@authorizeIndex');
+Route::post('/authorize', 'OAuthController@authorizePost');
