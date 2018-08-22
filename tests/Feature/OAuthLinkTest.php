@@ -17,7 +17,7 @@ class OAuthLinkTest extends TestCase
      */
     public function testGetsClientInfo()
     {
-        $unsuccessfulResponse = new Response(206, ['Content-Type' => 'application/json'], '
+        $mockResponse = new Response(206, ['Content-Type' => 'application/json'], '
             {
                 "total":1,
                 "data":[
@@ -33,10 +33,7 @@ class OAuthLinkTest extends TestCase
                 ]
             }'
         );
-        $mock       = new MockHandler([$unsuccessfulResponse]);
-        $handler    = HandlerStack::create($mock);
-        $client     = new Client(['handler' => $handler]);
-        $apiLink    = new OAuthLink($client);
+        $apiLink    = $this->createMockAPIClient([$mockResponse]);
         $expectedId = "12121212121";
         $clientInfo = $apiLink->getClientInfo("test_app");
         $this->assertEquals($expectedId, $clientInfo->client->id);
@@ -58,17 +55,28 @@ class OAuthLinkTest extends TestCase
                 "description": "Lorem ipsum desu"
             }
         ]';
-        $response = new Response(200, ['Content-Type' => 'application/json'],
+        $mockResponse = new Response(200, ['Content-Type' => 'application/json'],
             '{
                 "data": ' . $scopeDataString . '
             }'
         );
-        $mock      = new MockHandler([$response]);
-        $handler   = HandlerStack::create($mock);
-        $client    = new Client(['handler' => $handler, 'http_errors' => false]);
-        $apiLink   = new OAuthLink($client);
+        $apiLink    = $this->createMockAPIClient([$mockResponse], ['http_errors' => false]);
         $scopeInfo = $apiLink->getScopeInfo($scopeName);
         $this->assertEquals(json_decode($scopeDataString), $scopeInfo->scopes);
         $this->assertEquals(200, $scopeInfo->statusCode);
+    }
+
+    /**
+     * Creates a mock API client
+     * @param  array  $mockResponses    Array of Guzzle Response objects
+     * @param  array  $additionalParams Additional parameters to create Guzzle Client object
+     * @return OAuthLink                The mock API client
+     */
+    private function createMockAPIClient(array $mockResponses, array $additionalParams = [])
+    {
+        $mock      = new MockHandler($mockResponses);
+        $handler   = HandlerStack::create($mock);
+        $client    = new Client(array_merge(['handler' => $handler], $additionalParams));
+        return new OAuthLink($client);
     }
 }
