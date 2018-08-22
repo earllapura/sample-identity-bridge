@@ -57,4 +57,14 @@ class OAuthController extends Controller
             ]
         );
     }
+
+    public function authorizePost(Request $request)
+    {
+        if (!$request->filled('client_id') ||
+            !$request->filled('response_type') ||
+            !$request->filled('scope')
+        ) {
+            abort(400);
+        }
+    }
 }
