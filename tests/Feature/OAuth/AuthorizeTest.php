@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Feature;
+namespace Tests\Feature\OAuth;
 
 use App\KongClient\Contracts\OAuthLinkInterface;
 use App\KongClient\OAuthLink;
