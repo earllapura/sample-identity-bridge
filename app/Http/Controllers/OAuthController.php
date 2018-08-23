@@ -46,8 +46,10 @@ class OAuthController extends Controller
         }
 
         $scopeArray = array();
-        foreach ($scopeQueryResponse->scopes as $rawScope) {
-            $scopeArray[$rawScope->name] = $rawScope->description;
+        if (!empty($scopeQueryResponse->scopes)) {
+            foreach ($scopeQueryResponse->scopes as $rawScope) {
+                $scopeArray[$rawScope->name] = $rawScope->description;
+            }
         }
 
         return view('oauth.authorize',
