@@ -66,5 +66,14 @@ class OAuthController extends Controller
         ) {
             abort(400);
         }
+        $authorizationHeader = $request->header('Authorization');
+        $headers             = !empty($authorizationHeader) ? ['Authorization' => $authorizationHeader] : [];
+        $response            = $this->link->authorize($request->client_id, $request->response_type, $request->scope, $headers);
+        $statusCode          = $response->statusCode;
+        if (!($statusCode >= 200 && $statusCode < 300)) {
+            abort($statusCode);
+        }
+
+        return redirect($response->data->redirect_uri);
     }
 }
