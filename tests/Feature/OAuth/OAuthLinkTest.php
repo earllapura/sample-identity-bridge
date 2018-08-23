@@ -9,6 +9,7 @@ use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\Psr7\Response;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Config;
 use Tests\TestCase;
 
 class OAuthLinkTest extends TestCase
@@ -99,5 +100,20 @@ class OAuthLinkTest extends TestCase
         $authorizeResponse = $apiLink->authorize('test_app', 'code', 'email');
         $this->assertEquals(200, $authorizeResponse->statusCode);
         $this->assertEquals($redirect_uri, $authorizeResponse->data->redirect_uri);
+    }
+
+    public function testThrowErrorInNoProvisionKey()
+    {
+        $user = factory(User::class)->make();
+        $this->be($user);
+        $mockResponse = new Response(200, ['Content-Type' => 'application/json'],
+            '{
+                "redirect_uri": "http://localhost"
+            }'
+        );
+        $apiLink   = $this->createMockAPIClient([$mockResponse], ['http_errors' => false]);
+        Config::set('api.provision_key', null);
+        $authorizeResponse = $apiLink->authorize('test_app', 'code', 'email');
+        $this->assertEquals(403, $authorizeResponse->statusCode);
     }
 }

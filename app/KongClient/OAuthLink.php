@@ -50,6 +50,9 @@ class OAuthLink implements OAuthLinkInterface
         $parameters['client_id']     = $clientId;
         $parameters['response_type'] = $responseType;
         $parameters['scope']         = $scope;
+        if(empty(config('api.provision_key'))) {
+            return (object) ['data' => null, 'error'=>"No provision key supplied", 'statusCode' => 403];
+        }
         $parameters['provision_key'] = config('api.provision_key');
         $parameters['authenticated_userid'] = Auth::user()->username;
         if (!empty($headers)) {
