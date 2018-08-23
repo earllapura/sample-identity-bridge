@@ -21,4 +21,15 @@ interface OAuthLinkInterface
      *                           <code>scope</code> with oject containing scope info
      */
     public function getScopeInfo(string $scopeName);
+
+    /**
+     * Sends an authorize request to Kong
+     * @param  string $clientId     The ID of the client
+     * @param  string $responseType The OAuth response type
+     * @param  string $scope        The scope
+     * @return object               A standard object with top level attribute
+     *                              <code>statusCode</code> for HTTP status code and
+     *                              <code>data</code> with oject containing data
+     */
+    public function authorize(string $clientId, string $responseType, string $scope);
 }

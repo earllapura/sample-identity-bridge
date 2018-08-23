@@ -4,6 +4,7 @@ namespace App\KongClient;
 
 use App\KongClient\Contracts\OAuthLinkInterface;
 use GuzzleHttp\ClientInterface;
+use Illuminate\Support\Facades\Auth;
 use Psr\Http\Message\ResponseInterface;
 
 class OAuthLink implements OAuthLinkInterface
@@ -24,7 +25,7 @@ class OAuthLink implements OAuthLinkInterface
     {
         $response = $this->queryGateway(
             '/oauth2',
-            [ 'client_id' => $clientId, ]
+            ['client_id' => $clientId]
         );
         return $this->formatDataToJson($response, 'client', 0);
     }
@@ -36,9 +37,32 @@ class OAuthLink implements OAuthLinkInterface
     {
         $response = $this->queryGateway(
             '/auth/scopes',
-            [ 'scope_name' => $scopeName, ]
+            ['scope_name' => $scopeName]
         );
         return $this->formatDataToJson($response, 'scopes');
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function authorize(string $clientId, string $responseType, string $scope, array $headers = [])
+    {
+        $parameters['client_id']     = $clientId;
+        $parameters['response_type'] = $responseType;
+        $parameters['scope']         = $scope;
+        $parameters['provision_key'] = config('api.provision_key');
+        $parameters['authenticated_userid'] = Auth::user()->username;
+        if (!empty($headers)) {
+            $parameters['headers'] = $headers;
+        }
+
+        $response = $this->queryGateway(
+            '/auth/scopes',
+            $parameters,
+            "POST"
+        );
+        $parsed = json_decode($response->getBody());
+        return (object) ['data' => $parsed, 'statusCode' => $response->getStatusCode()];
     }
 
     /**
@@ -47,10 +71,10 @@ class OAuthLink implements OAuthLinkInterface
      * @param  array  $queryParameters The query parameters
      * @return ResponseInterface       The response from the gateway
      */
-    private function queryGateway(string $path, array $queryParameters)
+    private function queryGateway(string $path, array $queryParameters, string $method = "GET")
     {
         return $this->client->request(
-            'GET',
+            $method,
             config('api.gateway') . $path,
             $queryParameters
         );
@@ -59,18 +83,18 @@ class OAuthLink implements OAuthLinkInterface
     /**
      * Formats raw data to a standard object with status code and data
      * @param  ResponseInterface $response The Guzzle Response object
-     * @param  string            $dataKey  The data key 
+     * @param  string            $dataKey  The data key
      * @param  int|null          $index    The index of the object in the data array.
      *                                     Null means all.
      * @return object                      A standard object with top level attribute
      *                                     <code>statusCode</code> for HTTP status code and
      *                                     <code>dataKey</code> with object containing the data
      */
-    private function formatDataToJson(ResponseInterface $response, string $dataKey, int $index=null)
+    private function formatDataToJson(ResponseInterface $response, string $dataKey, int $index = null)
     {
         $parsed = json_decode($response->getBody());
-        $data = $this->getValueOfData($parsed, $index);
-        return (object)[$dataKey=>$data, 'statusCode'=>$response->getStatusCode()];
+        $data   = $this->getValueOfData($parsed, $index);
+        return (object) [$dataKey => $data, 'statusCode' => $response->getStatusCode()];
     }
 
     /**
@@ -80,10 +104,16 @@ class OAuthLink implements OAuthLinkInterface
      * @param  int|null $index          The index of the data in the data array
      * @return object|null              The parsed data object
      */
-    private function getValueOfData(object $parsedResponse, int $index=null)
+    private function getValueOfData(object $parsedResponse, int $index = null)
     {
-        if(!empty($parsed) && property_exists($parsed, 'data')) return null;
-        if(is_null($index)) return $parsedResponse->data;
+        if (empty($parsedResponse) || !property_exists($parsedResponse, 'data')) {
+            return null;
+        }
+
+        if (is_null($index)) {
+            return $parsedResponse->data;
+        }
+
         return $parsedResponse->data[$index];
     }
 }

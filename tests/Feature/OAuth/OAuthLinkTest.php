@@ -3,14 +3,30 @@
 namespace Tests\Feature\OAuth;
 
 use App\KongClient\OAuthLink;
+use App\User;
 use GuzzleHttp\Client;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\Psr7\Response;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 class OAuthLinkTest extends TestCase
 {
+    /**
+     * Creates a mock API client
+     * @param  array  $mockResponses    Array of Guzzle Response objects
+     * @param  array  $additionalParams Additional parameters to create Guzzle Client object
+     * @return OAuthLink                The mock API client
+     */
+    private function createMockAPIClient(array $mockResponses, array $additionalParams = [])
+    {
+        $mock    = new MockHandler($mockResponses);
+        $handler = HandlerStack::create($mock);
+        $client  = new Client(array_merge(['handler' => $handler], $additionalParams));
+        return new OAuthLink($client);
+    }
+
     /**
      * Test if class gets application info. The HTTP status code is just to test
      * if status code is reflected.
@@ -60,23 +76,28 @@ class OAuthLinkTest extends TestCase
                 "data": ' . $scopeDataString . '
             }'
         );
-        $apiLink    = $this->createMockAPIClient([$mockResponse], ['http_errors' => false]);
+        $apiLink   = $this->createMockAPIClient([$mockResponse], ['http_errors' => false]);
         $scopeInfo = $apiLink->getScopeInfo($scopeName);
         $this->assertEquals(json_decode($scopeDataString), $scopeInfo->scopes);
         $this->assertEquals(200, $scopeInfo->statusCode);
     }
 
     /**
-     * Creates a mock API client
-     * @param  array  $mockResponses    Array of Guzzle Response objects
-     * @param  array  $additionalParams Additional parameters to create Guzzle Client object
-     * @return OAuthLink                The mock API client
+     * Test sending POST request for authorization
      */
-    private function createMockAPIClient(array $mockResponses, array $additionalParams = [])
+    public function testSendsAuthorize()
     {
-        $mock      = new MockHandler($mockResponses);
-        $handler   = HandlerStack::create($mock);
-        $client    = new Client(array_merge(['handler' => $handler], $additionalParams));
-        return new OAuthLink($client);
+        $user = factory(User::class)->make();
+        $this->be($user);
+        $redirect_uri = "http://mockbin.org/";
+        $mockResponse = new Response(200, ['Content-Type' => 'application/json'],
+            '{
+                "redirect_uri": "'.$redirect_uri.'"
+            }'
+        );
+        $apiLink           = $this->createMockAPIClient([$mockResponse], ['http_errors' => false]);
+        $authorizeResponse = $apiLink->authorize('test_app', 'code', 'email');
+        $this->assertEquals(200, $authorizeResponse->statusCode);
+        $this->assertEquals($redirect_uri, $authorizeResponse->data->redirect_uri);
     }
 }
