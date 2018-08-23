@@ -43,7 +43,7 @@ class AuthorizeIndexTest extends TestCase
         $client->shouldReceive('getScopeInfo')->with('email')->andReturn((object) ['scope' => null, 'statusCode' => $statusCode]);
         $this->app->instance(OAuthLinkInterface::class, $client);
         $user     = factory(User::class)->create();
-        $response = $this->actingAs($user)->get('/authorize?client_id=test_app&response_type=code&scopes=email');
+        $response = $this->actingAs($user)->get('/authorize?client_id=test_app&response_type=code&scope=email');
         $response->assertStatus($statusCode);
     }
 
@@ -74,8 +74,11 @@ class AuthorizeIndexTest extends TestCase
         ]);
         $this->app->instance(OAuthLinkInterface::class, $client);
         $user     = factory(User::class)->create();
-        $response = $this->actingAs($user)->get('/authorize?client_id=test_app&response_type=code&scopes=email');
+        $response = $this->actingAs($user)->get('/authorize?client_id=test_app&response_type=code&scope=email');
         $response->assertViewHas('application_name', 'Test Application');
         $response->assertViewHas('scopes', ['email' => 'Grants permission to read your email address']);
+        $response->assertViewHas('client_id', "test_app");
+        $response->assertViewHas('response_type', "code");
+        $response->assertViewHas('scope', "email");
     }
 }

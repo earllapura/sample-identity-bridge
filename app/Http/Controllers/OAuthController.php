@@ -35,7 +35,7 @@ class OAuthController extends Controller
             abort(400);
         }
         $clientQueryResponse       = $this->link->getClientInfo($request->client_id);
-        $scopeQueryResponse        = $this->link->getScopeInfo($request->scopes);
+        $scopeQueryResponse        = $this->link->getScopeInfo($request->scope);
         $clientQueryResponseStatus = $clientQueryResponse->statusCode;
         $scopeQueryResponseStatus  = $clientQueryResponse->statusCode;
         if (!($clientQueryResponseStatus >= 200 && $clientQueryResponseStatus < 300)) {
@@ -54,6 +54,9 @@ class OAuthController extends Controller
             [
                 'application_name' => $clientQueryResponse->client->name,
                 'scopes'           => $scopeArray,
+                'client_id'        => $request->client_id,
+                'scope'            => $request->scope,
+                'response_type'    => $request->response_type,
             ]
         );
     }
