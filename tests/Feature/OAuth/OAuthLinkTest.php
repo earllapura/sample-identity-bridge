@@ -87,6 +87,22 @@ class OAuthLinkTest extends TestCase
     /**
      * Tests if class gets scope information from the Kong API
      */
+    public function testErrorThrownWhenNoScopeInfoPath()
+    {
+        Config::set('api.scope_path', null);
+        $mockResponse = new Response(200, ['Content-Type' => 'application/json'],
+            '{
+                "data": ""
+            }'
+        );
+        $apiLink   = $this->createMockAPIClient([$mockResponse], ['http_errors' => false]);
+        $scopeInfo = $apiLink->getScopeInfo("testscope scopetest");
+        $this->assertEquals(500, $scopeInfo->statusCode);
+    }
+
+    /**
+     * Tests if class gets scope information from the Kong API
+     */
     public function testGetsScopeInfo()
     {
         $scopeName       = "testscope scopetest";
@@ -106,8 +122,8 @@ class OAuthLinkTest extends TestCase
         );
         $apiLink   = $this->createMockAPIClient([$mockResponse], ['http_errors' => false]);
         $scopeInfo = $apiLink->getScopeInfo($scopeName);
-        $this->assertEquals(json_decode($scopeDataString), $scopeInfo->scopes);
         $this->assertEquals(200, $scopeInfo->statusCode);
+        $this->assertEquals(json_decode($scopeDataString), $scopeInfo->scopes);
     }
 
     /**

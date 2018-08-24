@@ -38,8 +38,11 @@ class OAuthLink implements OAuthLinkInterface
      */
     public function getScopeInfo(string $scopeName)
     {
+        if(empty(config('api.scope_path'))) {
+            return (object) ['data' => null, 'error'=>"No path for scope information configured in the system. Please contact the developer.", 'statusCode' => 500];
+        }
         $response = $this->queryGateway(
-            '/auth/scopes',
+            config('api.scope_path'),
             ['scope_name' => $scopeName]
         );
         return $this->formatDataToJson($response, 'scopes');

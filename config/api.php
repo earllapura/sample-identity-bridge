@@ -47,4 +47,15 @@ return [
     */
 
     'client_path' => env('API_CLIENT_PATH', '/oauth2'),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Scope API path
+    |--------------------------------------------------------------------------
+    |
+    | The path of the API resource for OAuth2 scopes.
+    |
+    */
+
+    'scope_path' => env('API_SCOPE_PATH', '/oauth2/scopes'),
 ];
