@@ -51,10 +51,10 @@ class OAuthLink implements OAuthLinkInterface
         $parameters['response_type'] = $responseType;
         $parameters['scope']         = $scope;
         if(empty(config('api.provision_key'))) {
-            return (object) ['data' => null, 'error'=>"No provision key supplied", 'statusCode' => 403];
+            return (object) ['data' => null, 'error'=>"No provision key configured in the system. Please contact the developer.", 'statusCode' => 500];
         }
         if(empty(config('api.path'))) {
-            return (object) ['data' => null, 'error'=>"No API path supplied", 'statusCode' => 400];
+            return (object) ['data' => null, 'error'=>"No API path configured in the system. Please contact the developer.", 'statusCode' => 500];
         }
         $parameters['provision_key'] = config('api.provision_key');
         $parameters['authenticated_userid'] = Auth::user()->username;

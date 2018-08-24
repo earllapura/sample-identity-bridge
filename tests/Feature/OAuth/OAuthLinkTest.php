@@ -114,7 +114,7 @@ class OAuthLinkTest extends TestCase
         $apiLink   = $this->createMockAPIClient([$mockResponse], ['http_errors' => false]);
         Config::set('api.provision_key', null);
         $authorizeResponse = $apiLink->authorize('test_app', 'code', 'email');
-        $this->assertEquals(403, $authorizeResponse->statusCode);
+        $this->assertEquals(500, $authorizeResponse->statusCode);
     }
 
     /**
@@ -132,6 +132,6 @@ class OAuthLinkTest extends TestCase
         $apiLink   = $this->createMockAPIClient([$mockResponse], ['http_errors' => false]);
         Config::set('api.path', null);
         $authorizeResponse = $apiLink->authorize('test_app', 'code', 'email');
-        $this->assertEquals(400, $authorizeResponse->statusCode);
+        $this->assertEquals(500, $authorizeResponse->statusCode);
     }
 }
