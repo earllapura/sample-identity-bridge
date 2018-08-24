@@ -116,4 +116,22 @@ class OAuthLinkTest extends TestCase
         $authorizeResponse = $apiLink->authorize('test_app', 'code', 'email');
         $this->assertEquals(403, $authorizeResponse->statusCode);
     }
+
+    /**
+     * Throws error when no configuration is set for API path
+     */
+    public function testThrowErrorWhenNoApiPath()
+    {
+        $user = factory(User::class)->make();
+        $this->be($user);
+        $mockResponse = new Response(200, ['Content-Type' => 'application/json'],
+            '{
+                "redirect_uri": "http://localhost"
+            }'
+        );
+        $apiLink   = $this->createMockAPIClient([$mockResponse], ['http_errors' => false]);
+        Config::set('api.path', null);
+        $authorizeResponse = $apiLink->authorize('test_app', 'code', 'email');
+        $this->assertEquals(400, $authorizeResponse->statusCode);
+    }
 }

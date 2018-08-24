@@ -53,6 +53,9 @@ class OAuthLink implements OAuthLinkInterface
         if(empty(config('api.provision_key'))) {
             return (object) ['data' => null, 'error'=>"No provision key supplied", 'statusCode' => 403];
         }
+        if(empty(config('api.path'))) {
+            return (object) ['data' => null, 'error'=>"No API path supplied", 'statusCode' => 400];
+        }
         $parameters['provision_key'] = config('api.provision_key');
         $parameters['authenticated_userid'] = Auth::user()->username;
         if (!empty($headers)) {
@@ -60,7 +63,7 @@ class OAuthLink implements OAuthLinkInterface
         }
 
         $response = $this->queryGateway(
-            '/auth/scopes',
+            config('api.path'),
             $parameters,
             "POST"
         );
