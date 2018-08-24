@@ -49,8 +49,11 @@
                             <p>
                                 By clicking Allow, you allow this app to use your information in accordance to their terms of service and privacy policies.
                             </p>
+                            <input type="hidden" name="client_id" value="{{ $client_id }}">
+                            <input type="hidden" name="response_type" value="{{ $response_type }}">
+                            <input type="hidden" name="scope" value="{{ $scope }}">
                             <input class="btn btn-primary btn-flat pull-right" name="authorized" type="submit" value="Allow"/>
-                            <input class="btn btn-default btn-flat pull-right" name="authorized" type="submit" value="Cancel"/>
+                            <a href="/" class="btn btn-danger btn-flat pull-right">Cancel</a>
                         </div>
                     </form>
                 </div>
