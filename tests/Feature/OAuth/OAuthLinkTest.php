@@ -29,6 +29,33 @@ class OAuthLinkTest extends TestCase
     }
 
     /**
+     * Test if error thrown when no path for client info is configured
+     */
+    public function testErrorThrownWhenNoClientInfoPath()
+    {
+        $mockResponse = new Response(206, ['Content-Type' => 'application/json'], '
+            {
+                "total":1,
+                "data":[
+                    {
+                        "created_at":1534239617000,
+                        "client_id":"test_app",
+                        "id":"12121212121",
+                        "redirect_uri":["http:\/\/mockbin.org\/"],
+                        "name":"Test Application",
+                        "client_secret":"testapp123",
+                        "consumer_id":"212121"
+                    }
+                ]
+            }'
+        );
+        Config::set('api.client_path', null);
+        $apiLink    = $this->createMockAPIClient([$mockResponse]);
+        $clientInfo = $apiLink->getClientInfo("test_app");
+        $this->assertEquals(500, $clientInfo->statusCode);
+    }
+
+    /**
      * Test if class gets application info. The HTTP status code is just to test
      * if status code is reflected.
      */
@@ -53,8 +80,8 @@ class OAuthLinkTest extends TestCase
         $apiLink    = $this->createMockAPIClient([$mockResponse]);
         $expectedId = "12121212121";
         $clientInfo = $apiLink->getClientInfo("test_app");
-        $this->assertEquals($expectedId, $clientInfo->client->id);
         $this->assertEquals(206, $clientInfo->statusCode);
+        $this->assertEquals($expectedId, $clientInfo->client->id);
     }
 
     /**

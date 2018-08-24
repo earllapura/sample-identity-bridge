@@ -23,8 +23,11 @@ class OAuthLink implements OAuthLinkInterface
      */
     public function getClientInfo(string $clientId)
     {
+        if(empty(config('api.client_path'))) {
+            return (object) ['data' => null, 'error'=>"No path for client information configured in the system. Please contact the developer.", 'statusCode' => 500];
+        }
         $response = $this->queryGateway(
-            '/oauth2',
+            config('api.client_path'),
             ['client_id' => $clientId]
         );
         return $this->formatDataToJson($response, 'client', 0);

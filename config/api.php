@@ -36,4 +36,15 @@ return [
     */
 
     'path' => env('API_PATH', '/'),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Client API path
+    |--------------------------------------------------------------------------
+    |
+    | The path of the API resource for OAuth2 clients.
+    |
+    */
+
+    'client_path' => env('API_CLIENT_PATH', '/oauth2'),
 ];
