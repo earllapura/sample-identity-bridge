@@ -11,7 +11,7 @@
                     <form method="POST">
                         @csrf
                         <div class="box-header with-border">
-                            <img alt="X" height="20" src="assets/img/icon.png" width="20">
+                            <img alt="X" height="20" src="img/icon.png" width="20">
                                 Sign in with My.IIT
                         </div>
                         <div class="box-body">
