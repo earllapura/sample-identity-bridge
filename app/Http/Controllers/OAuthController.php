@@ -32,7 +32,7 @@ class OAuthController extends Controller
     public function authorizeIndex(Request $request)
     {
         if (!$request->filled('client_id')) {
-            abort(400);
+            abort(400, "Client ID is not supplied");
         }
         $clientQueryResponse       = $this->link->getClientInfo($request->client_id);
         $scopeQueryResponse        = $this->link->getScopeInfo($request->scope);
@@ -76,7 +76,11 @@ class OAuthController extends Controller
         $response            = $this->link->authorize($request->client_id, $request->response_type, $request->scope, $headers);
         $statusCode          = $response->statusCode;
         if (!($statusCode >= 200 && $statusCode < 300)) {
-            abort($statusCode);
+            $message = "An error occurred.";
+            if(!empty($response->data->message)) {
+                $message = $response->data->message;
+            }
+            abort($statusCode, json_encode($response));
         }
 
         return redirect($response->data->redirect_uri);
