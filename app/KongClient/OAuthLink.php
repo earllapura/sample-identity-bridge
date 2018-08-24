@@ -69,7 +69,7 @@ class OAuthLink implements OAuthLinkInterface
         }
 
         $response = $this->queryGateway(
-            config('api.path'),
+            config('api.path') . '/oauth2/authorize',
             $parameters,
             "POST"
         );
